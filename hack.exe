@@ -1,0 +1,35 @@
+#!/bin/bash
+
+args=("$@")
+
+echo -ne "\e[32m\e[7m"
+echo "Hacking ${args[0]} now..."
+sleep 2
+echo -n "Injecting payload into data stream"
+sleep 1
+echo -n "."
+sleep 1
+echo -n "."
+sleep 1
+echo " Done!\n"
+echo -e "\e[33mEntering Phase 2..."
+echo -n "Sending DO NOT TRACK request to victim server.."
+sleep .5
+echo " Done!"
+sleep .75
+echo -n "Activating trojan function at 0x002A73BE.."
+sleep .25
+echo " Done!"
+echo -e "\e[36mEntering Phase 3..."
+sleep .25
+echo -n "Sending destructive packages"
+sleep .5
+echo -n "."
+sleep .5
+echo -n "."
+sleep 1
+echo " Done!"
+echo -e "\e[0m\e[32mSSH'ing into victim shell... Done!"
+PS1='(${args[0]})# '
+echo -e "\e[0m"
+exit

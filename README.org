@@ -1,0 +1,6 @@
+#+TITLE: hack.exe
+#+AUTHOR: cheeesy
+#+DATE: 2020
+
+** hack.exe
+hack.exe is very easy hacking tool for microsoft linux
