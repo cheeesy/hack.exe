@@ -1,39 +1,107 @@
 #!/bin/bash
 
 args=("$@")
+spamMode=0
 
+function interpretArgs {
+    if [ -z "${args[0]}" ]; then
+        echo "You need to specify whom to attack!"
+        exit
+    else
+        counter=0
+        while [ ! -z "${args[$counter]}" ]; do
+            if [[ "${args[$counter]}" == *"--"* ]]; then
+                if [ "${args[$counter]}" == "--spam" ]; then
+                    spamMode=1
+                fi
+            else
+                mainfunc "${args[$counter]}"
+            fi
+            ((counter++))
+        done
+        
+    fi
+    
+    
+}
 
+function mainfunc {
+    PseudoHexNumber=$(hexdump -n 3 -e '2/2 "%02X" 1 "\n"' /dev/urandom)
+    PseudoHexString="0x00${PseudoHexNumber}"
+    
+    echo -ne "\e[32m\e[7m"
+    echo "Hacking $1 now..."
+    sleep 2
+    echo -n "Injecting payload into data stream"
+    sleep 1
+    echo -n "."
+    sleep 1
+    echo -n "."
+    sleep 1
+    echo " Done!\n"
 
-echo -ne "\e[32m\e[7m"
-echo "Hacking ${args[0]} now..."
-sleep 2
-echo -n "Injecting payload into data stream"
-sleep 1
-echo -n "."
-sleep 1
-echo -n "."
-sleep 1
-echo " Done!\n"
-echo -e "\e[33mEntering Phase 2..."
-echo -n "Sending DO NOT TRACK request to victim server.."
-sleep .5
-echo " Done!"
-sleep .75
-PseudoHexNumber=$(hexdump -n 3 -e '2/2 "%02X" 1 "\n"' /dev/urandom)
-PseudoHexString="0x00${PseudoHexNumber}"
-#PseudoHexString="0x00$(hexdump -n 3 -e \'2/2 \"%02X\" 1 \"\n\"\' /dev/urandom)"
-echo -n "Activating trojan function at $PseudoHexString.."
-sleep .25
-echo " Done!"
-echo -e "\e[36mEntering Phase 3..."
-sleep .25
-echo -n "Sending destructive packages"
-sleep .5
-echo -n "."
-sleep .5
-echo -n "."
-sleep 1
-echo " Done!"
-echo -e "\e[0m\e[32mSSH'ing into victim shell... Done!"
-export PS1='(${args[0]})# '
-echo -e "\e[0m"
+    if [ "$spamMode" == 1 ]; then
+        echo -e "\e[0m\e[4m\e[32mLOG FILES:\e[0m"
+
+        for i in {1..16}
+        do
+            echo -n "0x"
+            hexdump -n 16 -e '4/4 "%08X" 1 "\n"' /dev/urandom
+        done
+
+        echo -ne "\e[7m"
+    fi
+    
+    echo -e "\e[33mEntering Phase 2..."
+    echo -n "Sending DO NOT TRACK request to victim server.."
+    sleep .5
+    echo " Done!"
+    sleep .75
+    echo -n "Activating trojan function at $PseudoHexString.."
+    sleep .25
+    echo " Done!"
+
+    if [ "$spamMode" == 1 ]; then
+        echo -e "\e[0m\e[4m\e[32mLOG FILES:\e[0m"
+
+        for i in {1..8}
+        do
+            for j in {1..34}
+            do
+                echo -n $(($RANDOM%2))
+            done
+            echo ""
+        done
+        
+        echo -ne "\e[7m"
+    fi
+    
+    echo -e "\e[36mEntering Phase 3..."
+    sleep .25
+    echo -n "Sending destructive packages"
+    sleep .5
+    echo -n "."
+    sleep .5
+    echo -n "."
+    sleep 1
+    echo " Done!"
+    echo -e "\e[0m\e[32mSSH'ing into victim shell... Done!"
+
+    if [ "$spamMode" == 1 ]; then
+        echo -e "\e[0m\e[4m\e[32mSSH HANDSHAKE:\e[0m"
+
+        echo -ne "\e[5m\e[31m"
+        for i in {1..16}
+        do
+            echo -n "0x"
+            hexdump -n 16 -e '4/4 "%08X" 1 "\n"' /dev/urandom
+        done
+
+        echo -ne "\e[7m"
+    fi
+    
+    export PS1='(${args[0]})# '
+    echo -e "\e[0m"
+}
+
+interpretArgs
