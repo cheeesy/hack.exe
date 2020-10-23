@@ -2,33 +2,56 @@
 
 args=("$@")
 spamMode=0
+randMode=0
+Xdone=0
+read -d '' StrHelp <<EOF
+hack.exe
+--------
+--spam: Activate spam mode (random data)
+--help: Print this help
+EOF
 
 function interpretArgs {
+    echo "${args[10]}"
     if [ -z "${args[0]}" ]; then
         echo "You need to specify whom to attack!"
         exit
     else
         counter=0
-        while [ ! -z "${args[$counter]}" ]; do
-            if [[ "${args[$counter]}" == *"--"* ]]; then
-                if [ "${args[$counter]}" == "--spam" ]; then
+        for i in $args
+        do
+            ((counter++))
+            if [[ "${i}" != *"--"* ]]; then
+                counter=$i
+            elif [[ "${i}" == *"--"* ]]; then
+                if [ "${i}" == "--help" ]; then
+                    echo "${StrHelp}"
+                    exit
+                fi
+                if [ "${i}" == "--spam" ]; then
                     spamMode=1
                 fi
-            else
-                mainfunc "${args[$counter]}"
             fi
-            ((counter++))
         done
+        mainfunc "${args[$counter]}"
+        #while [ ! -z "${args[$counter]}" ]; do
+        #    if [[ "${args[$counter]}" == *"--"* ]]; then
+        #        if [ "${args[$counter]}" == "--spam" ]; then
+        #            spamMode=1
+        #        fi
+        #    else
+        #        mainfunc "${args[$counter]}"
+        #    fi
+        #    ((counter++))
+        #done
         
     fi
     
-    
+    #echo "wut"
 }
 
-function mainfunc {
-    PseudoHexNumber=$(hexdump -n 3 -e '2/2 "%02X" 1 "\n"' /dev/urandom)
-    PseudoHexString="0x00${PseudoHexNumber}"
-    
+function scriptedHack { # This will be phased out eventually.
+    # It's broken anyway.
     echo -ne "\e[32m\e[7m"
     echo "Hacking $1 now..."
     sleep 2
@@ -40,7 +63,7 @@ function mainfunc {
     sleep 1
     echo " Done!\n"
 
-    if [ "$spamMode" == 1 ]; then
+    if [ "$2" == 1 ]; then
         echo -e "\e[0m\e[4m\e[32mLOG FILES:\e[0m"
 
         for i in {1..16}
@@ -61,7 +84,7 @@ function mainfunc {
     sleep .25
     echo " Done!"
 
-    if [ "$spamMode" == 1 ]; then
+    if [ "$2" == 1 ]; then
         echo -e "\e[0m\e[4m\e[32mLOG FILES:\e[0m"
 
         for i in {1..8}
@@ -87,7 +110,7 @@ function mainfunc {
     echo " Done!"
     echo -e "\e[0m\e[32mSSH'ing into victim shell... Done!"
 
-    if [ "$spamMode" == 1 ]; then
+    if [ "$2" == 1 ]; then
         echo -e "\e[0m\e[4m\e[32mSSH HANDSHAKE:\e[0m"
 
         echo -ne "\e[5m\e[31m"
@@ -99,9 +122,160 @@ function mainfunc {
 
         echo -ne "\e[7m"
     fi
+    exit
+}
+
+function mainfunc { ###################################################
+    PseudoHexNumber=$(hexdump -n 3 -e '2/2 "%02X" 1 "\n"' /dev/urandom)
+    PseudoHexString="0x00${PseudoHexNumber}"
+    
+    #echo -ne "\e[32m\e[7m"
+    echo "HACK.exe"
+    echo -e "\nTARGET: ${1}"
+
+    usedNums=()
+    
+    for i in {1..4}
+    do
+        randomnum=$((1 + RANDOM % 4))
+        while [[ "${usedNums[@]}" =~ "${randomnum}" ]]; do
+            randomnum=$((1 + RANDOM % 4))
+        done
+        case "${randomnum}" in # Phase order generation
+            1)
+                usedNums+=($randomnum)
+                echo "it's 1"
+                continue
+                ;;
+            2)
+                usedNums+=($randomnum)
+                echo "it's 2"
+                continue
+                ;;
+            3)
+                usedNums+=($randomnum)
+                echo "it's 3"
+                continue
+                ;;
+            4)
+                usedNums+=($randomnum)
+                echo "it's 4"
+                continue
+                ;;
+        esac
+    done
+    
+    for i in {0..3} # If you know how to optimise this send a PR
+    do
+        echo -e "\e[31m\e[7mEntering phase ${i}...\e[0m"
+        case "${usedNums[$i]}" in
+            1)
+                echo -ne "\e[32m\e[7m"
+                sleep 2
+                echo -n "Injecting payload into data stream"
+                sleep 1
+                echo -n "."
+                sleep 1
+                echo -n "."
+                sleep 1
+                echo " Done!"
+
+                if [ "$spamMode" == 1 ]; then
+                    echo -e "\e[0m\e[4m\e[32mLOG FILES:\e[0m"
+
+                    for i in {1..16}
+                    do
+                        echo -n "0x"
+                        hexdump -n 16 -e '4/4 "%08X" 1 "\n"' /dev/urandom
+                    done
+
+                    echo -ne "\e[7m"
+                fi
+                echo -ne "\e[0m"
+                ;;
+            2)
+                echo -ne "\e[33m\e[7m"
+                echo -n "Sending DO NOT TRACK request to victim server.."
+                sleep .5
+                echo " Done!"
+                sleep .75
+                echo -n "Activating trojan function at $PseudoHexString.."
+                sleep .25
+                echo " Done!"
+
+                if [ "$spamMode" == 1 ]; then
+                    echo -e "\e[0m\e[4m\e[32mLOG FILES:\e[0m"
+
+                    for i in {1..8}
+                    do
+                        for j in {1..34}
+                        do
+                            echo -n $(($RANDOM%2))
+                        done
+                        echo ""
+                    done
+                    
+                    echo -ne "\e[7m"
+                fi
+                echo -ne "\e[0m"
+                ;;
+            3)
+                echo -ne "\e[36m\e[7m"
+                sleep .25
+                echo -n "Sending destructive packages"
+                sleep .5
+                echo -n "."
+                sleep .5
+                echo -n "."
+                sleep 1
+                echo " Done!"
+                echo -e "\e[0m\e[32mSSH'ing into victim shell... Done!"
+
+                if [ "$spamMode" == 1 ]; then
+                    echo -e "\e[0m\e[4m\e[32mSSH HANDSHAKE:\e[0m"
+
+                    echo -ne "\e[5m\e[31m"
+                    for i in {1..16}
+                    do
+                        echo -n "0x"
+                        hexdump -n 16 -e '4/4 "%08X" 1 "\n"' /dev/urandom
+                    done
+
+                    echo -ne "\e[7m"
+                fi
+                echo -ne "\e[0m"
+                ;;
+            4)
+                echo -ne "\e[33m\e[7m"
+                sleep .25
+                echo -n "Trying out common passwords"
+                sleep .5
+                echo -n "."
+                sleep .25
+                echo -n " Done! 12781 passwords tried. The correct one was: 'l3gend4ryPyth0n'!"
+                if [ "$spamMode" == 1 ]; then
+                    echo -e "\e[0m\e[4m\e[32mENCRYPTION DEBRIS:\e[0m"
+                    echo -ne "\e[4m\e[31m"
+                    for i in {1..24}
+                    do
+                        echo -n "0x"
+                        hexdump -n 16 -e '4/4 "%08X" 1 "\n"' /dev/urandom
+                    done
+
+                    echo -ne "\e[7m"
+                fi
+                echo -ne "\e[0m"
+                ;;
+        esac
+    done
+
+    #for i in "${usedNums[@]}"
+    #do
+    #    echo "$i"
+    #done
     
     export PS1='(${args[0]})# '
-    echo -e "\e[0m"
+    echo -ne "\e[0m"
 }
 
 interpretArgs

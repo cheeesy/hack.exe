@@ -4,3 +4,9 @@
 
 ** hack.exe
 hack.exe is very easy hacking tool for microsoft linux
+
+** read
+use arguments like this
+=./hack.exe --argument TARGET=
+
+anything else will cause it to go apeshit, so don't do it, and give me a pull request to help me fix it, because I can't.
